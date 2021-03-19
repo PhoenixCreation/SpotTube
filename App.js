@@ -1,21 +1,34 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React from "react";
+import { createStackNavigator } from "@react-navigation/stack";
+import Home from "./Routes/Home";
+import { NavigationContainer } from "@react-navigation/native";
+import { StatusBar } from "expo-status-bar";
+import Music from "./Routes/Music";
+import Videos from "./Routes/Video";
 
-export default function App() {
+const Stack = createStackNavigator();
+
+const app = () => {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator
+        screenOptions={{
+          gestureEnabled: false,
+          headerShown: false,
+          cardOverlayEnabled: false,
+          cardStyle: { backgroundColor: "transparent" },
+          animationEnabled: true,
+          gestureDirection: "horizontal",
+        }}
+        mode="card"
+      >
+        <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen name="Music" component={Music} />
+        <Stack.Screen name="Video" component={Videos} />
+      </Stack.Navigator>
+      <StatusBar hidden />
+    </NavigationContainer>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default app;
