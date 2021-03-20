@@ -1,6 +1,12 @@
 import React, { useRef, useEffect, useState } from "react";
 import { StyleSheet, Text, View, Dimensions, Pressable } from "react-native";
 import { Video } from "expo-av";
+/** config.js contains this values
+  export const theme = {
+  backgroundColor: "#f1f1f1",
+  fontColor: "#212121",
+};
+*/
 import { theme } from "../config";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import Animated, {
@@ -56,7 +62,7 @@ const Videos = () => {
       const point = translationY + 0.2 * velocityY;
       if (state.value === "down") {
         if (point > 0) {
-          // Go down
+          // Go down rather close the player
           translateY.value = withTiming(BAR_HEIGHT);
           offsetY.value = BAR_HEIGHT;
         } else {
@@ -121,14 +127,6 @@ const Videos = () => {
     };
   });
 
-  useEffect(() => {
-    if (video.current) {
-      return () => {
-        video.current.unloadAsync();
-      };
-    }
-  }, [video]);
-
   return (
     <View style={styles.container}>
       <View style={styles.mainCont}>
@@ -158,16 +156,16 @@ const Videos = () => {
               />
             </Animated.View>
           </PanGestureHandler>
-          <Pressable
-            onPress={() => {
-              status.isPlaying
-                ? video.current.pauseAsync()
-                : video.current.playAsync();
-            }}
-          >
-            <Text>{status.isPlaying ? "pause" : "Play"}</Text>
-          </Pressable>
         </View>
+        <Pressable
+          onPress={() => {
+            status.isPlaying
+              ? video.current.pauseAsync()
+              : video.current.playAsync();
+          }}
+        >
+          <Text>{status.isPlaying ? "pause" : "Play"}</Text>
+        </Pressable>
       </Animated.View>
     </View>
   );
