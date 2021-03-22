@@ -144,6 +144,7 @@ const Videos = () => {
         <View style={styles.gestureCont}>
           <PanGestureHandler onGestureEvent={onGestureEvent}>
             <Animated.View style={playerContStyle}>
+              {/* Here there should a oone more container which will be reposnsible for size variations */}
               <AnimatedVideo
                 ref={video}
                 style={videoStyle}
