@@ -5,6 +5,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import Music from "./Routes/Music";
 import Videos from "./Routes/Video";
+import Test from "./Routes/Test";
 
 const Stack = createStackNavigator();
 
@@ -25,6 +26,7 @@ const app = () => {
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="Music" component={Music} />
         <Stack.Screen name="Video" component={Videos} />
+        <Stack.Screen name="Test" component={Test} />
       </Stack.Navigator>
       <StatusBar hidden />
     </NavigationContainer>
