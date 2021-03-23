@@ -54,14 +54,6 @@ const SpotTubeHome = ({ navigation }) => {
           </Text>
         </View>
       </TouchableOpacity>
-      <TouchableOpacity
-        style={{ ...styles.card, ...styles.cardRight }}
-        onPress={() => navigation.navigate("Test")}
-      >
-        <View style={styles.typeCont}>
-          <Text style={{ ...styles.typeText, ...styles.videoText }}>Test</Text>
-        </View>
-      </TouchableOpacity>
     </View>
   );
 };
@@ -88,7 +80,7 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   card: {
-    width: 100,
+    width: 150,
     height: 150,
     backgroundColor: "#00ff34",
     borderRadius: 20,
