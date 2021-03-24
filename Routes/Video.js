@@ -15,8 +15,6 @@ import { AntDesign, Entypo, Ionicons } from "@expo/vector-icons";
 
 import * as MediaLibrary from "expo-media-library";
 
-const AnimatedVideo = Animated.createAnimatedComponent(Video);
-
 const { width, height } = Dimensions.get("window");
 
 const BAR_HEIGHT = 60;
@@ -29,6 +27,11 @@ const Videos = () => {
   const [playbackControls, setPlaybackControls] = useState(true);
 
   const togglePlaybackControls = () => {
+    // if (!playbackControls) {
+    //   setTimeout(() => {
+    //     setPlaybackControls(false);
+    //   }, 5000);
+    // }
     setPlaybackControls((last) => setPlaybackControls(!last));
   };
 
@@ -166,11 +169,13 @@ const Videos = () => {
                     ref={video}
                     style={styles.video}
                     source={{
-                      uri: "file:///storage/emulated/0/Download/bannerg004.mp4",
+                      uri: "file:///storage/emulated/0/Download/flash.mkv",
                     }}
                     useNativeControls={false}
                     resizeMode="cover"
-                    onPlaybackStatusUpdate={(newstatus) => setStatus(newstatus)}
+                    onPlaybackStatusUpdate={(newstatus) => {
+                      setStatus(newstatus);
+                    }}
                   />
                   {playbackControls && (
                     <Animated.View style={styles.playbackControlsCont}>
@@ -265,7 +270,32 @@ const Videos = () => {
                           />
                         </Pressable>
                       </View>
-                      <View style={styles.controllerProgress}></View>
+                      <View style={styles.controllerProgress}>
+                        <View style={styles.progressBackground}></View>
+                        <View
+                          style={{
+                            height: "100%",
+                            backgroundColor: "red",
+                            width:
+                              status.positionMillis > 0
+                                ? (width * status.positionMillis) /
+                                  status.durationMillis
+                                : 0,
+                          }}
+                        ></View>
+                        <PanGestureHandler>
+                          <Animated.View
+                            style={{
+                              ...styles.progressPoint,
+                              left:
+                                status.positionMillis > 0
+                                  ? (width * status.positionMillis) /
+                                    status.durationMillis
+                                  : 0,
+                            }}
+                          ></Animated.View>
+                        </PanGestureHandler>
+                      </View>
                     </Animated.View>
                   )}
                 </Animated.View>
@@ -312,7 +342,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: "100%",
     height: "100%",
-    backgroundColor: "#0005",
+    backgroundColor: "#0008",
     flexDirection: "column",
     justifyContent: "space-between",
   },
@@ -331,8 +361,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   controllerProgress: {
-    height: 30,
+    height: 2,
     width: "100%",
+  },
+  progressBackground: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "#fff6",
+  },
+  progressPoint: {
+    position: "absolute",
+    width: 10,
+    height: 10,
+    borderRadius: 10,
+    backgroundColor: "red",
+    top: -4,
   },
   controllerName: {
     flex: 1,
