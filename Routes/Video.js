@@ -1,5 +1,12 @@
 import React, { useRef, useEffect, useState } from "react";
-import { StyleSheet, Text, View, Dimensions, Pressable } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Dimensions,
+  Pressable,
+  Button,
+} from "react-native";
 import { Video } from "expo-av";
 import { theme } from "../config";
 import { PanGestureHandler } from "react-native-gesture-handler";
@@ -26,6 +33,9 @@ const Videos = () => {
   const [status, setStatus] = useState({});
   const [playbackControls, setPlaybackControls] = useState(true);
 
+  const [userVideos, setUserVideos] = useState([]);
+  const [currentVideo, setCurrentVideo] = useState({});
+
   const togglePlaybackControls = () => {
     // if (!playbackControls) {
     //   setTimeout(() => {
@@ -35,23 +45,27 @@ const Videos = () => {
     setPlaybackControls((last) => setPlaybackControls(!last));
   };
 
-  // useEffect(() => {
-  //   getVideos();
-  // }, []);
+  useEffect(() => {
+    getVideos();
+  }, []);
 
-  // const getVideos = async () => {
-  //   try {
-  //     const { status } = await MediaLibrary.requestPermissionsAsync();
-  //     if (status === "granted") {
-  //       const userVideos = await MediaLibrary.getAssetsAsync({
-  //         first: 999,
-  //         mediaType: MediaLibrary.MediaType.video,
-  //       });
-  //     }
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
+  const getVideos = async () => {
+    try {
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      if (status === "granted") {
+        const userVideosTemp = await MediaLibrary.getAssetsAsync({
+          first: 999,
+          mediaType: MediaLibrary.MediaType.video,
+        });
+        setUserVideos(userVideosTemp.assets);
+        setCurrentVideo(
+          userVideosTemp.assets.length > 0 ? userVideosTemp.assets[0] : {}
+        );
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const translateY = useSharedValue(0);
   const offsetY = useSharedValue(0);
@@ -80,12 +94,12 @@ const Videos = () => {
           translateY.value = withTiming(0);
           offsetY.value = 0;
           state.value = "down";
+          runOnJS(setPlaybackControls)(false);
         } else {
           // Go Full Screen
+          // TODO: full screen is not happenig... only God knows why
           translateY.value = withTiming(-(height - BAR_HEIGHT));
           offsetY.value = -(height - BAR_HEIGHT);
-
-          // state.value = "full";
         }
       }
     },
@@ -143,6 +157,24 @@ const Videos = () => {
     state.value = "down";
   };
 
+  const goToThisPosition = (translationX) => {
+    "worklet";
+    const pos = translationX / width;
+    runOnJS(setPlaybackPosition)(pos * status.durationMillis);
+  };
+
+  function setPlaybackPosition(positionToGoTo) {
+    video?.current?.setPositionAsync(positionToGoTo + status.positionMillis);
+  }
+
+  const progressGesture = useAnimatedGestureHandler({
+    onStart: () => {},
+    onActive: () => {},
+    onEnd: ({ x }) => {
+      goToThisPosition(x);
+    },
+  });
+
   return (
     <View style={styles.container}>
       <View style={styles.mainCont}>
@@ -153,6 +185,21 @@ const Videos = () => {
         >
           <Text>Go full screen</Text>
         </Pressable>
+        {userVideos.map((userVideo, index) => {
+          // TODO: Transfer as a saprate component to do some things like generate thumbnail etc with expo-video-thumbnails
+          return (
+            <Pressable
+              key={index}
+              style={{ height: 40, borderBottomWidth: 1, borderColor: "grey" }}
+              onPress={() => {
+                setCurrentVideo(userVideo);
+                goUp();
+              }}
+            >
+              <Text>{userVideo.filename}</Text>
+            </Pressable>
+          );
+        })}
       </View>
       <Animated.View style={videoContStyle}>
         <View style={styles.gestureCont}>
@@ -169,10 +216,10 @@ const Videos = () => {
                     ref={video}
                     style={styles.video}
                     source={{
-                      uri: "file:///storage/emulated/0/Download/flash.mkv",
+                      uri: currentVideo.uri,
                     }}
                     useNativeControls={false}
-                    resizeMode="cover"
+                    resizeMode="stretch"
                     onPlaybackStatusUpdate={(newstatus) => {
                       setStatus(newstatus);
                     }}
@@ -283,7 +330,7 @@ const Videos = () => {
                                 : 0,
                           }}
                         ></View>
-                        <PanGestureHandler>
+                        <PanGestureHandler onGestureEvent={progressGesture}>
                           <Animated.View
                             style={{
                               ...styles.progressPoint,
@@ -370,11 +417,11 @@ const styles = StyleSheet.create({
   },
   progressPoint: {
     position: "absolute",
-    width: 10,
-    height: 10,
-    borderRadius: 10,
+    width: 20,
+    height: 20,
+    borderRadius: 30,
     backgroundColor: "red",
-    top: -4,
+    top: -7,
   },
   controllerName: {
     flex: 1,

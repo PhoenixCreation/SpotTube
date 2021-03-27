@@ -1,32 +1,60 @@
 import React, { useRef, useState } from "react";
 import { StyleSheet, Text, View, Dimensions } from "react-native";
-
-import { Video } from "expo-av";
-import Animated from "react-native-reanimated";
-
-const AnimatedVideo = Animated.createAnimatedComponent(Video);
+import Animated, {
+  useSharedValue,
+  withSpring,
+  useAnimatedStyle,
+  useAnimatedGestureHandler,
+  runOnJS,
+} from "react-native-reanimated";
+import { PanGestureHandler } from "react-native-gesture-handler";
 
 const { width, height } = Dimensions.get("window");
 
-const Test = () => {
-  const video = useRef(null);
-  const [status, setStatus] = useState({});
+function Test() {
+  const x = useSharedValue(0);
+  const y = useSharedValue(0);
+
+  const gestureHandler = useAnimatedGestureHandler({
+    onStart: (_, ctx) => {
+      ctx.startX = x.value;
+      ctx.startY = y.value;
+    },
+    onActive: (event, ctx) => {
+      x.value = ctx.startX + event.translationX;
+      y.value = ctx.startY + event.translationY;
+    },
+    onEnd: () => {
+      x.value = withSpring(width / 2 - 50, { damping: 2 });
+      y.value = withSpring(height / 2 - 50, { damping: 2 });
+    },
+  });
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      width: 100,
+      height: 100,
+      borderRadius: 100,
+      backgroundColor: "red",
+      transform: [
+        {
+          translateX: x.value,
+        },
+        {
+          translateY: y.value,
+        },
+      ],
+    };
+  });
 
   return (
     <View style={styles.container}>
-      <Video
-        ref={video}
-        style={styles.video}
-        source={{
-          uri: "file:///storage/emulated/0/Download/bannerg004.mp4",
-        }}
-        useNativeControls={true}
-        resizeMode="cover"
-        // onPlaybackStatusUpdate={(newstatus) => setStatus(newstatus)}
-      />
+      <PanGestureHandler onGestureEvent={gestureHandler}>
+        <Animated.View style={[animatedStyle]} />
+      </PanGestureHandler>
     </View>
   );
-};
+}
 
 export default Test;
 
@@ -34,9 +62,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "white",
-  },
-  video: {
-    width,
-    height: 200,
   },
 });

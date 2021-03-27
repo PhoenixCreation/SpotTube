@@ -54,6 +54,22 @@ const SpotTubeHome = ({ navigation }) => {
           </Text>
         </View>
       </TouchableOpacity>
+      <TouchableOpacity
+        style={{ ...styles.card, ...styles.cardRight }}
+        onPress={() => navigation.navigate("Test")}
+      >
+        <View style={styles.logoCont}>
+          <Ionicons
+            style={{ ...styles.logo, ...styles.videoLogo }}
+            name="md-videocam"
+            size={40}
+            color="black"
+          />
+        </View>
+        <View style={styles.typeCont}>
+          <Text style={{ ...styles.typeText, ...styles.videoText }}>Test</Text>
+        </View>
+      </TouchableOpacity>
     </View>
   );
 };
