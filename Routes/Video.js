@@ -21,6 +21,7 @@ import Animated, {
 import { AntDesign, Entypo, Ionicons } from "@expo/vector-icons";
 
 import * as MediaLibrary from "expo-media-library";
+import VideosComp from "../Components/VideosComp";
 
 const { width, height } = Dimensions.get("window");
 
@@ -48,6 +49,10 @@ const Videos = () => {
   useEffect(() => {
     getVideos();
   }, []);
+
+  useEffect(() => {
+    video?.current?.playAsync();
+  }, [currentVideo]);
 
   const getVideos = async () => {
     try {
@@ -178,28 +183,13 @@ const Videos = () => {
   return (
     <View style={styles.container}>
       <View style={styles.mainCont}>
-        <Pressable
-          onPress={() => {
-            goUp();
-          }}
-        >
-          <Text>Go full screen</Text>
-        </Pressable>
-        {userVideos.map((userVideo, index) => {
-          // TODO: Transfer as a saprate component to do some things like generate thumbnail etc with expo-video-thumbnails
-          return (
-            <Pressable
-              key={index}
-              style={{ height: 40, borderBottomWidth: 1, borderColor: "grey" }}
-              onPress={() => {
-                setCurrentVideo(userVideo);
-                goUp();
-              }}
-            >
-              <Text>{userVideo.filename}</Text>
-            </Pressable>
-          );
-        })}
+        {userVideos.length > 0 && (
+          <VideosComp
+            goUp={goUp}
+            setCurrentVideo={setCurrentVideo}
+            videos={userVideos}
+          />
+        )}
       </View>
       <Animated.View style={videoContStyle}>
         <View style={styles.gestureCont}>
