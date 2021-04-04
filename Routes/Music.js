@@ -34,22 +34,46 @@ import {
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import * as MediaLibrary from "expo-media-library";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const { width, height } = Dimensions.get("window");
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const BAR_HEIGHT = 60;
 
-const theme = {
-  backgroundColor: "#333333",
-  playerBackgroundColor: "#7878d1",
-};
 
 const SpringConfig = {
   damping: 12,
 };
 
 export default function Music({ navigation }) {
+  const [theme,setTheme] = useState({})
+
+  useEffect(() => {
+    getTheme().then(lastTheme => {
+      setTheme(lastTheme)
+    })
+  },[])
+  const getTheme = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem('@SpotTube_theme')
+      if(jsonValue === null){
+        await setObjectValue({
+          backgroundColor: "#333333",
+          playerBackgroundColor: "#7878d1",
+        })
+      }
+      console.log("theme loaded");
+      return jsonValue != null ? JSON.parse(jsonValue) : {
+        backgroundColor: "#333333",
+        playerBackgroundColor: "#7878d1",
+      }
+    } catch(e) {
+      console.log(e)
+    }
+  }
+
+
   const [sound, setSound] = useState(null);
   const [songs, setSongs] = useState(defaultSongs);
   const [currentSong, setCurrentSong] = useState(songs[0]);
@@ -495,6 +519,324 @@ export default function Music({ navigation }) {
     });
   };
 
+  if(!theme?.backgroundColor){
+    return <View><Text>Theme is loading</Text></View>
+  }
+
+
+  const sliderStyles = StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    innerCont: {
+      width: "100%",
+      height: "100%",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    background: {
+      width: "100%",
+      height: 5,
+      backgroundColor: "white",
+      borderRadius: 10,
+    },
+    timeStart: {
+      fontSize: 14,
+      position: "absolute",
+      left: 0,
+      bottom: 0,
+      color: "white",
+    },
+    timeEnd: {
+      fontSize: 14,
+      position: "absolute",
+      right: 0,
+      bottom: 0,
+      color: "white",
+    },
+  });
+  
+  const styles = StyleSheet.create({
+    likeAnimationCont: {
+      position: "absolute",
+    },
+    container: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: theme.backgroundColor,
+    },
+    topBarCont: {
+      width,
+      height: 50,
+      backgroundColor: theme.backgroundColor,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingHorizontal: 20,
+      borderTopLeftRadius: 15,
+      borderTopRightRadius: 15,
+      borderWidth: 1,
+      borderColor: theme.playerBackgroundColor,
+      borderBottomColor: "transparent",
+    },
+    headingCont: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    heading: {
+      color: "#d1d1dd",
+      fontSize: 18,
+      fontWeight: "100",
+    },
+    backButtonCont: {
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+    },
+    moreOptionsCont: {
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+    },
+    backButton: {
+      fontSize: 35,
+    },
+    moreOptions: {
+      fontSize: 20,
+    },
+    albumsCont: {
+      width,
+      height: height - BAR_HEIGHT - 50,
+      backgroundColor: theme.backgroundColor,
+      zIndex: 1,
+      alignItems: "center",
+      padding: 15,
+      paddingBottom: 0,
+      borderWidth: 1,
+      borderColor: theme.playerBackgroundColor,
+      borderTopColor: "transparent",
+      borderBottomColor: "transparent",
+      marginTop: -2,
+    },
+    albumImageCont: {
+      width: "80%",
+      height: 240,
+      alignItems: "center",
+    },
+    albumImage: {
+      width: "100%",
+      height: "100%",
+      borderRadius: 30,
+      resizeMode: "stretch",
+    },
+    artistImageCont: {
+      position: "absolute",
+      bottom: 10,
+      right: 10,
+      elevation: 20,
+      borderRadius: 40,
+    },
+    artistImage: {
+      width: 40,
+      height: 40,
+      borderRadius: 40,
+    },
+    shuffleButton: {
+      position: "absolute",
+      bottom: 10,
+      height: 40,
+      justifyContent: "center",
+      paddingHorizontal: 20,
+      borderRadius: 20,
+      backgroundColor: theme.playerBackgroundColor,
+      elevation: 10,
+    },
+    shuffleButtonText: {
+      fontSize: 16,
+      color: "white",
+    },
+    albumsListCont: {
+      width,
+      flex: 1,
+      borderWidth: 2,
+      borderColor: theme.playerBackgroundColor,
+      borderRadius: 15,
+      borderBottomRightRadius: 0,
+      borderBottomLeftRadius: 0,
+      borderBottomColor: "transparent",
+      marginTop: 10,
+      marginBottom: -15,
+      paddingBottom: 15,
+    },
+    songCont: {
+      flexDirection: "row",
+      width: "100%",
+      height: 50,
+      borderBottomWidth: 2,
+      borderRadius: 50,
+      borderColor: "#414141",
+      paddingLeft: 20,
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    songImageCont: {
+      width: 40,
+      height: 40,
+      marginRight: 10,
+      alignItems: "center",
+      justifyContent: "center",
+      position: "relative",
+    },
+    songImage: {
+      width: "100%",
+      height: "100%",
+      borderRadius: 30,
+    },
+    isPlaying: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: "#31313199",
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: 40,
+    },
+    songInfo: {
+      flex: 1,
+    },
+    songName: {
+      color: "white",
+      fontSize: 16,
+    },
+    artistsName: {
+      color: "lightgrey",
+      fontSize: 12,
+    },
+    songOption: {
+      paddingHorizontal: 15,
+      paddingVertical: 5,
+    },
+    playerFull: {
+      width: "100%",
+      height: "100%",
+      zIndex: 8,
+    },
+    playerSongImageCont: {
+      width: 40,
+      height: 40,
+      borderRadius: 50,
+      overflow: "hidden",
+      marginRight: 10,
+    },
+    playerSongImage: {
+      width: "100%",
+      height: "100%",
+      borderRadius: 50,
+      resizeMode: "cover",
+    },
+    playerSongInfoCont: {
+      flex: 1,
+      marginTop: -5,
+    },
+    playerSongName: {
+      fontWeight: "bold",
+      color: "white",
+      fontSize: 19,
+    },
+    playerArtistsName: {
+      fontSize: 12,
+      color: "white",
+      marginTop: -5,
+    },
+    lastSongCont: {
+      paddingHorizontal: 5,
+    },
+    playPauseSongCont: {
+      paddingHorizontal: 5,
+    },
+    nextSongCont: {
+      paddingHorizontal: 5,
+    },
+    muteCont: {
+      paddingHorizontal: 5,
+      marginLeft: 3,
+    },
+    fullGotoBottom: {
+      padding: 10,
+    },
+    fullTopBar: {
+      height: 100,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: 20,
+    },
+    fullOptionsCont: {
+      flexDirection: "row",
+    },
+    fullMuteOptionCont: {
+      padding: 10,
+    },
+    fullWaveOptionCont: {
+      padding: 10,
+    },
+    fullMoreOptionCont: {
+      padding: 10,
+    },
+    fullmiddleBar: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    fullImageCont: {
+      width: width / 2,
+      height: width / 2,
+      borderRadius: 15,
+      overflow: "hidden",
+      elevation: 5,
+    },
+    fullImage: {
+      width: "100%",
+      height: "100%",
+    },
+    fullSongInfoCont: {
+      width: "100%",
+    },
+    fullSongName: {
+      fontSize: 22,
+      color: "white",
+      width: "100%",
+      textAlign: "center",
+    },
+    fullArtistsName: {
+      fontSize: 16,
+      color: "lightgrey",
+      width: "100%",
+      textAlign: "center",
+    },
+    fullBottomBar: {
+      height: 200,
+      paddingVertical: 15,
+    },
+    fullBottomFirst: {
+      flex: 1,
+      justifyContent: "space-between",
+      alignItems: "center",
+      flexDirection: "row",
+      paddingHorizontal: 30,
+    },
+    fullBottomSecond: {
+      flex: 1,
+      justifyContent: "space-between",
+      alignItems: "center",
+      flexDirection: "row",
+      paddingHorizontal: 30,
+    },
+    fullBottomThird: {
+      flex: 1,
+      justifyContent: "space-between",
+      alignItems: "center",
+      flexDirection: "row",
+      paddingHorizontal: 30,
+    },
+  });
+
   return (
     <View style={styles.container}>
       <View style={styles.topBarCont}>
@@ -829,315 +1171,3 @@ export default function Music({ navigation }) {
   );
 }
 
-const sliderStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  innerCont: {
-    width: "100%",
-    height: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  background: {
-    width: "100%",
-    height: 5,
-    backgroundColor: "white",
-    borderRadius: 10,
-  },
-  timeStart: {
-    fontSize: 14,
-    position: "absolute",
-    left: 0,
-    bottom: 0,
-    color: "white",
-  },
-  timeEnd: {
-    fontSize: 14,
-    position: "absolute",
-    right: 0,
-    bottom: 0,
-    color: "white",
-  },
-});
-
-const styles = StyleSheet.create({
-  likeAnimationCont: {
-    position: "absolute",
-  },
-  container: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: theme.backgroundColor,
-  },
-  topBarCont: {
-    width,
-    height: 50,
-    backgroundColor: theme.backgroundColor,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    borderTopLeftRadius: 15,
-    borderTopRightRadius: 15,
-    borderWidth: 1,
-    borderColor: theme.playerBackgroundColor,
-    borderBottomColor: "transparent",
-  },
-  headingCont: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  heading: {
-    color: "#d1d1dd",
-    fontSize: 18,
-    fontWeight: "100",
-  },
-  backButtonCont: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-  },
-  moreOptionsCont: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-  },
-  backButton: {
-    fontSize: 35,
-  },
-  moreOptions: {
-    fontSize: 20,
-  },
-  albumsCont: {
-    width,
-    height: height - BAR_HEIGHT - 50,
-    backgroundColor: theme.backgroundColor,
-    zIndex: 1,
-    alignItems: "center",
-    padding: 15,
-    paddingBottom: 0,
-    borderWidth: 1,
-    borderColor: theme.playerBackgroundColor,
-    borderTopColor: "transparent",
-    borderBottomColor: "transparent",
-    marginTop: -2,
-  },
-  albumImageCont: {
-    width: "80%",
-    height: 240,
-    alignItems: "center",
-  },
-  albumImage: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 30,
-    resizeMode: "stretch",
-  },
-  artistImageCont: {
-    position: "absolute",
-    bottom: 10,
-    right: 10,
-    elevation: 20,
-    borderRadius: 40,
-  },
-  artistImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 40,
-  },
-  shuffleButton: {
-    position: "absolute",
-    bottom: 10,
-    height: 40,
-    justifyContent: "center",
-    paddingHorizontal: 20,
-    borderRadius: 20,
-    backgroundColor: theme.playerBackgroundColor,
-    elevation: 10,
-  },
-  shuffleButtonText: {
-    fontSize: 16,
-    color: "white",
-  },
-  albumsListCont: {
-    width,
-    flex: 1,
-    borderWidth: 2,
-    borderColor: "lightgrey",
-    borderRadius: 15,
-    borderBottomRightRadius: 0,
-    borderBottomLeftRadius: 0,
-    borderBottomColor: "transparent",
-    marginTop: 10,
-    marginBottom: -15,
-    paddingBottom: 15,
-  },
-  songCont: {
-    flexDirection: "row",
-    width: "100%",
-    height: 50,
-    borderBottomWidth: 2,
-    borderRadius: 50,
-    borderColor: "#414141",
-    paddingLeft: 20,
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  songImageCont: {
-    width: 40,
-    height: 40,
-    marginRight: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
-  },
-  songImage: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 30,
-  },
-  isPlaying: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "#31313199",
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 40,
-  },
-  songInfo: {
-    flex: 1,
-  },
-  songName: {
-    color: "white",
-    fontSize: 16,
-  },
-  artistsName: {
-    color: "lightgrey",
-    fontSize: 12,
-  },
-  songOption: {
-    paddingHorizontal: 15,
-    paddingVertical: 5,
-  },
-  playerFull: {
-    width: "100%",
-    height: "100%",
-    zIndex: 8,
-  },
-  playerSongImageCont: {
-    width: 40,
-    height: 40,
-    borderRadius: 50,
-    overflow: "hidden",
-    marginRight: 10,
-  },
-  playerSongImage: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 50,
-    resizeMode: "cover",
-  },
-  playerSongInfoCont: {
-    flex: 1,
-    marginTop: -5,
-  },
-  playerSongName: {
-    fontWeight: "bold",
-    color: "white",
-    fontSize: 19,
-  },
-  playerArtistsName: {
-    fontSize: 12,
-    color: "white",
-    marginTop: -5,
-  },
-  lastSongCont: {
-    paddingHorizontal: 5,
-  },
-  playPauseSongCont: {
-    paddingHorizontal: 5,
-  },
-  nextSongCont: {
-    paddingHorizontal: 5,
-  },
-  muteCont: {
-    paddingHorizontal: 5,
-    marginLeft: 3,
-  },
-  fullGotoBottom: {
-    padding: 10,
-  },
-  fullTopBar: {
-    height: 100,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-  },
-  fullOptionsCont: {
-    flexDirection: "row",
-  },
-  fullMuteOptionCont: {
-    padding: 10,
-  },
-  fullWaveOptionCont: {
-    padding: 10,
-  },
-  fullMoreOptionCont: {
-    padding: 10,
-  },
-  fullmiddleBar: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  fullImageCont: {
-    width: width / 2,
-    height: width / 2,
-    borderRadius: 15,
-    overflow: "hidden",
-    elevation: 5,
-  },
-  fullImage: {
-    width: "100%",
-    height: "100%",
-  },
-  fullSongInfoCont: {
-    width: "100%",
-  },
-  fullSongName: {
-    fontSize: 22,
-    color: "white",
-    width: "100%",
-    textAlign: "center",
-  },
-  fullArtistsName: {
-    fontSize: 16,
-    color: "lightgrey",
-    width: "100%",
-    textAlign: "center",
-  },
-  fullBottomBar: {
-    height: 200,
-    paddingVertical: 15,
-  },
-  fullBottomFirst: {
-    flex: 1,
-    justifyContent: "space-between",
-    alignItems: "center",
-    flexDirection: "row",
-    paddingHorizontal: 30,
-  },
-  fullBottomSecond: {
-    flex: 1,
-    justifyContent: "space-between",
-    alignItems: "center",
-    flexDirection: "row",
-    paddingHorizontal: 30,
-  },
-  fullBottomThird: {
-    flex: 1,
-    justifyContent: "space-between",
-    alignItems: "center",
-    flexDirection: "row",
-    paddingHorizontal: 30,
-  },
-});

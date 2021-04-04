@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
@@ -17,10 +18,49 @@ const { width, height } = Dimensions.get("window");
 
 const Test = () => {
   const [mode, setMode] = useState("playerBackgroundColor");
-  const [theme, setTheme] = useState({
-    backgroundColor: "#333333",
-    playerBackgroundColor: "#7878d1",
-  });
+  const [theme, setTheme] = useState({});
+
+  useEffect(() => {
+    getMyObject().then(lastTheme => {
+      setTheme(lastTheme)
+    })
+  },[])
+
+  const setObjectValue = async (value) => {
+    try {
+      const jsonValue = JSON.stringify(value)
+      await AsyncStorage.setItem('@SpotTube_theme', jsonValue)
+    } catch(e) {
+      // save error
+    }
+  
+    console.log('SetItem Done.')
+  }
+
+  const getMyObject = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem('@SpotTube_theme')
+      if(jsonValue === null){
+        await setObjectValue({
+          backgroundColor: "#333333",
+          playerBackgroundColor: "#7878d1",
+        })
+      }
+      return jsonValue != null ? JSON.parse(jsonValue) : {
+        backgroundColor: "#333333",
+        playerBackgroundColor: "#7878d1",
+      }
+    } catch(e) {
+      console.log(e)
+    }
+  
+    console.log('GetItem Done.')
+  
+  }
+
+  if(!theme.backgroundColor){
+    return <View><Text>App is loading</Text></View>
+  }
 
   return (
     <View style={styles.container}>
@@ -73,7 +113,14 @@ const Test = () => {
           }}
         ></View>
       </View>
-      <Button styles={{ width: "100%" }} title="Save" />
+      <Button styles={{ width: "100%" }} title="Save" onPress={() => {setObjectValue(theme)}} />
+      <Button styles={{ width: "100%"}} title="Reset" onPress={() => {setObjectValue({
+        backgroundColor: "#333333",
+        playerBackgroundColor: "#7878d1",});
+        setTheme({
+          backgroundColor: "#333333",
+          playerBackgroundColor: "#7878d1",})
+        }} />
     </View>
   );
 };
